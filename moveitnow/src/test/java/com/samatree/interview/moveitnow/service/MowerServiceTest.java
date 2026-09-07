@@ -122,4 +122,22 @@ class MowerServiceTest {
         Mower result = mowerService.turnRight(mower);
         assertEquals('E', result.getDirection());
     }
+
+    @Test
+    void rejectsUnknownCommands() {
+        MowCommand command = new MowCommand(new Mower(0, 0, 'N'), "FX");
+
+        IllegalArgumentException error = assertThrows(IllegalArgumentException.class,
+                () -> mowerService.processCommands(new LawnField(5, 5), List.of(command)));
+
+        assertEquals("Commands may contain only L, R, and F", error.getMessage());
+    }
+
+    @Test
+    void rejectsUnknownDirection() {
+        MowCommand command = new MowCommand(new Mower(0, 0, 'Q'), "F");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mowerService.processCommands(new LawnField(5, 5), List.of(command)));
+    }
 }
