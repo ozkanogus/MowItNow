@@ -4,6 +4,7 @@ package com.samatree.interview.moveitnow.controller;
 import com.samatree.interview.moveitnow.model.MowRequest;
 import com.samatree.interview.moveitnow.model.Mower;
 import com.samatree.interview.moveitnow.service.MowerService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -20,7 +21,7 @@ public class MowerController {
     }
 
     @PostMapping("/mow")
-    public List<Mower> mowItNow(@RequestBody MowRequest request){
+    public List<Mower> mowItNow(@Valid @RequestBody MowRequest request){
        return mowerService.processCommands(request.getLawnField(), request.getMoveItCommandList());
     }
 

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class MowerService {
 
     public List<Mower> processCommands(LawnField lawnField, List<MowCommand> mowCommandList) {
+        validateRequest(lawnField, mowCommandList);
         Map<String, Integer> locatedMowerPositions = new HashMap<>();
         List<MowCommand> locateMowCommandList = new ArrayList<>();
 
@@ -104,15 +105,11 @@ public class MowerService {
     }
 
     public String parsedRequestAndProcessCommands(String input) {
-        try {
-            MowRequest parsedRequest = parseInputString(input);
-            List<Mower> mowers =  processCommands(parsedRequest.getLawnField(),parsedRequest.getMoveItCommandList());
-            return mowers.stream()
-                    .map(mower -> mower.getPositionX() + " " + mower.getPositionY() + " " + mower.getDirection())
-                    .collect(Collectors.joining("\n"));
-        }catch (IllegalArgumentException e){
-            return e.getMessage();
-        }
+        MowRequest parsedRequest = parseInputString(input);
+        List<Mower> mowers = processCommands(parsedRequest.getLawnField(), parsedRequest.getMoveItCommandList());
+        return mowers.stream()
+                .map(mower -> mower.getPositionX() + " " + mower.getPositionY() + " " + mower.getDirection())
+                .collect(Collectors.joining("\n"));
     }
 
     private MowRequest parseInputString(String input) {
@@ -143,5 +140,25 @@ public class MowerService {
         }
 
         return new MowRequest(lawnField, mowCommands);
+    }
+
+    private void validateRequest(LawnField lawnField, List<MowCommand> commands) {
+        if (lawnField == null || lawnField.getWidth() < 0 || lawnField.getHeight() < 0) {
+            throw new IllegalArgumentException("Lawn dimensions must be non-negative");
+        }
+        if (commands == null || commands.isEmpty()) {
+            throw new IllegalArgumentException("At least one mower command is required");
+        }
+        for (MowCommand command : commands) {
+            if (command == null || command.getMower() == null || command.getCommands() == null) {
+                throw new IllegalArgumentException("Each mower requires a position and commands");
+            }
+            if ("NESW".indexOf(command.getMower().getDirection()) < 0) {
+                throw new IllegalArgumentException("Mower direction must be N, E, S, or W");
+            }
+            if (!command.getCommands().matches("[LRF]+")) {
+                throw new IllegalArgumentException("Commands may contain only L, R, and F");
+            }
+        }
     }
 }
